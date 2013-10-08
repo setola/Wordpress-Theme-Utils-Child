@@ -1,0 +1,35 @@
+/*
+THEME NAME:      Wordpress Theme Utils Child Theme
+THEME URI:       http://www.emanueletessore.com/
+VERSION:         1.0.0
+AUTHOR:          Emanuele Tessore
+AUTHOR URI:      http://www.emanueletessore.com/
+DESCRIPTION:     This is a Child Theme of Wordpress Theme Utils
+TEMPLATE:        Wordpress-Theme-Utils
+*/
+body {
+	padding-top: 50px; /* Add space for the bootstrap fixed navbar */
+}
+
+.admin-bar .navbar-fixed-top{
+	margin-top: 28px;
+}
+
+#footer {
+	background-color: #f5f5f5;
+	padding: 20px 0;
+}
+
+#footer .searchform{
+	margin-top: 20px;
+}
+
+.entry-content {
+	padding: 20px 0;
+}
+
+
+.entry-content img {
+	max-width: 100%;
+	height: auto;
+}
