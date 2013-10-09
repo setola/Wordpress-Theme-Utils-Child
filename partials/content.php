@@ -46,16 +46,27 @@ $more_link =
 // to mantain the css as clean as possible, let's add the jumbotron class
 // if the current post is candidate for sticky class :)
 $post_classes = get_post_class('entry-content', $post_id);
-if(in_array('sticky', $post_classes)) $post_classes[] = 'jumbotron';
+//if(in_array('sticky', $post_classes)) $post_classes[] = 'jumbotron';
 
 // Let's add some usefull information about the current post
 $icon_class = 'glyphicon';
 $separator = '&nbsp;&nbsp;';
 $metas = array();
-$metas[] = HtmlHelper::span('', array('class'=>$icon_class.' glyphicon-time')).$separator.get_the_date();
-$metas[] = HtmlHelper::span('', array('class'=>$icon_class.' glyphicon-folder-open')).$separator.get_the_category_list(', ');
-$metas[] = HtmlHelper::span('', array('class'=>$icon_class.' glyphicon-tags')).$separator.get_the_tag_list('', ', ');
 
+$date = get_the_date();
+if($date){
+	$metas[] = HtmlHelper::span('', array('class'=>$icon_class.' glyphicon-time')).$separator.$date;
+}
+
+$categories = get_the_category_list(', ');
+if($categories){
+	$metas[] = HtmlHelper::span('', array('class'=>$icon_class.' glyphicon-folder-open')).$separator.$categories;
+}
+
+$tags = get_the_tag_list('', ', ');
+if($tags){
+	$metas[] = HtmlHelper::span('', array('class'=>$icon_class.' glyphicon-tags')).$separator.get_the_tag_list('', ', ');
+}
 
 $subs = new SubstitutionTemplate();
 echo $subs
@@ -64,9 +75,8 @@ echo $subs
 	->set_markup('post_class', join(' ', $post_classes))
 	->set_markup('title', $title)
 	->set_markup('metas', HtmlHelper::unorderd_list($metas, array('class'=>'list-inline')))
-	->set_markup('content', get_the_content($more_link))
+	->set_markup('content', apply_filters('the_content', get_the_content($more_link)))
 	->replace_markup();
-
 
 
 

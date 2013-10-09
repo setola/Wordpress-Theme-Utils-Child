@@ -44,7 +44,47 @@ function my_theme_socials(){
 }
 add_action('wtu_socials', 'my_theme_socials');
 
+/**
+ * Customized [caption] shortcode
+ * @param unknown $attr
+ * @param unknown $content
+ * @return unknown|string
+ */
+function my_theme_caption($val, $attr, $content){
+	$attr = shortcode_atts(
+		array(
+			'id'		=>	'',
+			'align'		=>	'aligncenter',
+			'width'		=>	'',
+			'caption'	=>	''
+		), 
+		$attr
+	);
+	
+	$caption = HtmlHelper::standard_tag(
+		'figcaption', 
+		$attr['caption'], 
+		array_merge(
+			array(
+				'id'=>'figcaption_'.$attr['id'], 
+				'class'=>'wp-caption-text'
+			),
+			(array)$attr['caption']
+		)
+	);
+
+	return HtmlHelper::standard_tag(
+		'figure', 
+		do_shortcode($content).$caption, 
+		array(
+			'id'=>$attr['id'], 
+			'class'=>'wp-caption img-thumbnail ' . esc_attr($attr['align'])
+		)
+	);
+
+}
+add_filter('img_caption_shortcode', 'my_theme_caption', 10, 3);
 
 
-
-
+function my_theme_gallery($content, $attr) { return 'THE GALLERY IS UNDER PROCESS!!! :D';}
+add_filter('post_gallery', 'my_theme_gallery', 10, 2);
