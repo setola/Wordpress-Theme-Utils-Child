@@ -23,6 +23,7 @@ $tpl = <<< EOF
 		<div class="entry-meta">
 			%metas%
 		</div>
+		%thumbnail%
 		<div class="content">
 			%content%
 		</div>
@@ -39,7 +40,7 @@ if(!is_singular()) $title = HtmlHelper::anchor(get_permalink(), $title);
 
 $more_link = 
 	'<button type="button" class="btn btn-default">'
-	.sprintf(__('Read More on %s', 'theme'), get_the_title())
+	.sprintf(__('<small>Read More on</small> <strong>%s</strong>', 'theme'), get_the_title())
 	.'</button>';
 
 // for this theme the sticky post is displayed as a bootstrap jumbotron.
@@ -68,12 +69,24 @@ if($tags){
 	$metas[] = HtmlHelper::span('', array('class'=>$icon_class.' glyphicon-tags')).$separator.get_the_tag_list('', ', ');
 }
 
+$thumbnail = '';
+if(function_exists('has_post_thumbnail') && has_post_thumbnail() && ! post_password_required()){
+	$thumb = wp_get_attachment_image_src(get_post_thumbnail_id(), 'post-thumbnail');
+	
+	$content = '[caption align="aligncenter" width="'.$thumb[1].'"]';
+	$content .= get_the_post_thumbnail();
+	$content .= get_the_title();
+	$content .= '[/caption]';
+	$thumbnail = do_shortcode($content);
+}
+
 $subs = new SubstitutionTemplate();
 echo $subs
 	->set_tpl($tpl)
 	->set_markup('post_id', get_the_ID())
 	->set_markup('post_class', join(' ', $post_classes))
 	->set_markup('title', $title)
+	->set_markup('thumbnail', $thumbnail)
 	->set_markup('metas', HtmlHelper::unorderd_list($metas, array('class'=>'list-inline')))
 	->set_markup('content', apply_filters('the_content', get_the_content($more_link)))
 	->replace_markup();

@@ -11,7 +11,7 @@ body {
 	padding-top: 50px; /* Add space for the bootstrap fixed navbar */
 }
 
-.admin-bar .navbar-fixed-top{
+.admin-bar .navbar-fixed-top {
 	margin-top: 28px;
 }
 
@@ -20,7 +20,7 @@ body {
 	padding: 20px 0;
 }
 
-#footer .searchform{
+#footer .searchform {
 	margin-top: 20px;
 }
 
@@ -28,7 +28,40 @@ body {
 	padding: 20px 0;
 }
 
-.entry-content img, .entry-summary img, .comment-content img, .widget img, .wp-caption {
-    max-width: 100%;
+.entry-content img,.entry-summary img,.comment-content img,.widget img,.wp-caption {
+	max-width: 100%;
 	height: auto;
+	clear: both;
+}
+
+.aligncenter {
+	display: block;
+	margin: 20px auto;
+	text-align: center;
+}
+
+figcaption{
+	text-align: right;
+}
+
+.alignleft {
+	float: left;
+	margin: 20px 20px 20px 0px;
+}
+
+.alignright {
+	float: right;
+	margin: 20px 0px 20px 20px;
+}
+
+img.alignnone {
+	margin: 0px;
+}
+
+.aligncenter > div{
+	margin: 0 auto;
+}
+
+.blog article{
+	border-bottom: 1px solid #eee;
 }

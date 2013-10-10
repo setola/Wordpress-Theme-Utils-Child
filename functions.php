@@ -44,8 +44,9 @@ function my_theme_socials(){
 }
 add_action('wtu_socials', 'my_theme_socials');
 
+
 /**
- * Customized [caption] shortcode
+ * Customized [caption] shortcode to output html 5 markup
  * @param unknown $attr
  * @param unknown $content
  * @return unknown|string
@@ -54,37 +55,116 @@ function my_theme_caption($val, $attr, $content){
 	$attr = shortcode_atts(
 		array(
 			'id'		=>	'',
-			'align'		=>	'aligncenter',
-			'width'		=>	'',
+			'align'		=>	'',
+			'width'		=>	580, //if you don't specify the width in your shorcode, this is the default value will be considered.
 			'caption'	=>	''
-		), 
+		),
 		$attr
 	);
-	
+
 	$caption = HtmlHelper::standard_tag(
-		'figcaption', 
-		$attr['caption'], 
-		array_merge(
-			array(
-				'id'=>'figcaption_'.$attr['id'], 
-				'class'=>'wp-caption-text'
-			),
-			(array)$attr['caption']
-		)
+			'figcaption',
+			$attr['caption'],
+			array_merge(
+					array(
+							'id'		=>	'figcaption_'.$attr['id'],
+							'class'		=>	'wp-caption-text'
+					),
+					(array)$attr['caption']
+			)
 	);
+	
+	// fix for having the aligncenter class properly working
+	// (css 'margin: auto' property requires a known width element)
+	// 10 is 2 times the sum of padding and border for this theme
+	if($attr['align'] == 'aligncenter'){
+		$style = 'width:'.(intval($attr['width'])+10).'px';
+	}
 
 	return HtmlHelper::standard_tag(
-		'figure', 
-		do_shortcode($content).$caption, 
-		array(
-			'id'=>$attr['id'], 
-			'class'=>'wp-caption img-thumbnail ' . esc_attr($attr['align'])
-		)
+			'figure',
+			do_shortcode($content).$caption,
+			array(
+					'id'			=>	$attr['id'],
+					'class'			=>	'wp-caption img-thumbnail ' . esc_attr($attr['align']),
+					'style'			=>	$style
+			)
 	);
 
 }
 add_filter('img_caption_shortcode', 'my_theme_caption', 10, 3);
 
-
 function my_theme_gallery($content, $attr) { return 'THE GALLERY IS UNDER PROCESS!!! :D';}
 add_filter('post_gallery', 'my_theme_gallery', 10, 2);
+
+/**
+ * [caption] shortcode now renders html 5 code
+ * @param unknown $html
+ * @param unknown $id
+ * @param unknown $caption
+ * @param unknown $title
+ * @param unknown $align
+ * @param unknown $url the url the image have to link to
+ * @param unknown $size
+ * @return string
+ */
+function my_theme_img_tag_filter($html, $id, $caption, $title, $align, $url, $size, $alt) {
+	$thumb = wp_get_attachment_image_src($id, $size);
+	$image = HtmlHelper::image(
+			$thumb[0],
+			array(
+					'class'		=>	implode(' ', array('align'.$align, 'size-'.$size, 'wp-image-'.$id, 'img-thumbnail')),
+					'width'		=>	$thumb[1],
+					'height'	=>	$thumb[2],
+					'alt'		=>	$alt
+			)
+	);
+
+	if($url){
+		if(!$title){
+			$title = get_the_title($id);
+		} 
+		$image = HtmlHelper::anchor($url, $image, array('title'=>$title)); 
+	}
+	
+	return $image;
+
+
+	// nice piece of code to enable html 5 figcaption
+	// but by doing so you'll break the wysiwyg editor
+	// capability to edit image once it's inserted 
+	// into the post content. Sorry folks
+	/*$figcaption = '';
+	if($caption){
+		$figcaption = HtmlHelper::standard_tag(
+			'figcaption',
+			$caption,
+			array(
+				'class'	=>	'wp-caption-text'
+			)
+		);
+	}
+	
+	$thumb = wp_get_attachment_image_src($id, $size);
+	
+	$image = HtmlHelper::image(
+		$thumb[0], 
+		array(
+			'class'		=>	implode(' ', array('align'.$align, 'size-'.$size, 'wp-image-'.$id)), 
+			'title'		=>	$title
+		)
+	);
+
+	if($url){
+		$image = HtmlHelper::anchor($url, $image);
+	}
+
+	return HtmlHelper::standard_tag(
+		'figure',
+		$image.$figcaption,
+		array(
+			'class'		=>	implode(' ', array('wp-caption', 'img-thumbnail', $align))
+		)
+	);*/
+}
+add_filter( 'image_send_to_editor', 'my_theme_img_tag_filter', 10, 9 );
