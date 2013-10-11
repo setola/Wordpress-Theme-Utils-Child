@@ -27,10 +27,42 @@ function my_theme_custom_init(){
 	// use v() vd() vc() functions
 	ThemeUtils::enable_debug();
 	
+	// we want to be able to have multiple groups of images to split in different gallery in a single page.
+	MediaManager::enable();
+	$slideshow_config = array(
+			'label'		=>	__('Slideshow', 'wtu_framework'),
+			'shortcode'	=>	'slideshow',
+			'wpml'		=>	array(
+					'default_lang'			=>	true,
+					'homepage'				=>	true,
+					'homepage_default_lang'	=>	true
+			),
+			'exclude'	=>	array('template-gallery.php', 'template-location.php', 'template-offers.php')
+	);
+	MediaManager::set_media_list('slideshow', $slideshow_config);
+	
+	$minigallery_config = array(
+			'label'		=>	__('Minigallery', 'wtu_framework'),
+			'shortcode'	=>	'minigallery',
+			'exclude'	=>	array('template-gallery.php', 'template-location.php', 'front-page.php', 'template-offers.php')
+	);
+	MediaManager::set_media_list('minigallery', $minigallery_config);
+	
+	$photogallery_config = array(
+			'label'		=>	__('Photogallery', 'wtu_framework'),
+			'shortcode'	=>	'photogallery',
+			'include'	=>	array('template-gallery.php')
+	);
+	MediaManager::set_media_list('photogallery', $photogallery_config);
+	
+	
+	
 }
 add_action('after_setup_theme', 'my_theme_custom_init');
 
-
+/**
+ * Adds some social icons using AddThis service
+ */
 function my_theme_socials(){
 	?>
 		<div class="addthis_toolbox addthis_default_style addthis_32x32_style">
@@ -42,8 +74,33 @@ function my_theme_socials(){
 	<?php 
 	ThemeHelpers::load_js('addthis');
 }
-add_action('wtu_socials', 'my_theme_socials');
+add_action('my_theme_socials', 'my_theme_socials');
 
+/**
+ * Adds some entries into the credits menu
+ */
+function my_theme_credits(){
+	$toret = array();
+	$toret[] = HtmlHelper::anchor(
+			home_url('/'),
+			sprintf(__('&copy; %s', 'theme'), get_bloginfo('name'))
+	);
+	$toret[] = HtmlHelper::anchor(
+			__('https://github.com/setola/Wordpress-Theme-Utils/', 'theme'),
+			sprintf(__('Built on %s', 'theme'), 'WordPress Themes Utils')
+	);
+	$toret[] = HtmlHelper::anchor(
+			__('http://wordpress.org/', 'theme'),
+			sprintf(__('Powered by %s', 'theme' ), 'WordPress')
+	);
+	$toret[] = HtmlHelper::anchor(
+			__('http://eclipse.org/', 'theme'),
+			sprintf(__('Coded with %s', 'theme' ), 'Eclipse')
+	);
+
+	echo HtmlHelper::unorderd_list($toret, array('class'=>'linear-menu clearfix'));
+}
+add_action('my_theme_credits', 'my_theme_credits');
 
 /**
  * Customized [caption] shortcode to output html 5 markup
@@ -168,3 +225,58 @@ function my_theme_img_tag_filter($html, $id, $caption, $title, $align, $url, $si
 	);*/
 }
 add_filter( 'image_send_to_editor', 'my_theme_img_tag_filter', 10, 9 );
+
+
+
+function login_menu(){
+	$tpl = <<<EOF
+		<form class="inline-form login-form margin-form" action="%action%" method="post">
+			<fieldset>
+				<input type="text" name="log" class="input-small pull-left" placeholder="%user%">
+				<input type="password" name="pwd" class="input-small pull-right" placeholder="%password%">
+				<label class="checkbox pull-left">
+					<input type="checkbox" name="rememberme" checked="checked" value="forever"> %remember%
+				</label>
+				<button type="submit" name="submit" value="Send" class="btn btn-primary pull-right">%signin%</button>
+				<div style="clear:both;"></div>
+			</fieldset>
+		</form>
+EOF;
+
+	$sub = new SubstitutionTemplate();
+	return $sub
+		->set_tpl($tpl)
+		->set_markup('action', get_option('home').'/wp-login.php')
+		->set_markup('user', __('Username', 'theme'))
+		->set_markup('password', __('Password', 'theme'))
+		->set_markup('remember', __('Remember Me', 'theme'))
+		->set_markup('signin', __('Sign In', 'theme'))
+		->replace_markup();
+}
+
+function logout_menu(){
+	$logout_href 		= wp_logout_url(urlencode($_SERVER['REQUEST_URI']));
+	$logout 				= __('Logout', self::textdomain);
+	$admin_href 		= '/wp-admin/';
+	$admin 					= __('Dashboard', self::textdomain);
+	$vehicles_href 	= '/wp-admin/admin.php?page='.VehiclesStatsConfig::get_instance()->menu->vehicles->slug;
+	$vehicles 			= __('Vehicles', self::textdomain);
+	$events_href 		= '/wp-admin/admin.php?page='.VehiclesStatsConfig::get_instance()->menu->manage->slug;
+	$events 				= __('Events', self::textdomain);
+	$stats_href 		= '/wp-admin/admin.php?page='.VehiclesStatsConfig::get_instance()->menu->stats->slug;
+	$stats 					= __('Stats', self::textdomain);
+
+	return <<<EOF
+			<li><a href="$admin_href" rel="noinde,nofollow">$admin</a></li>
+			<li><a href="$vehicles_href" rel="noinde,nofollow">$vehicles</a></li>
+			<li><a href="$events_href" rel="noinde,nofollow">$events</a></li>
+			<li><a href="$stats_href" rel="noinde,nofollow">$stats</a></li>
+			<li class="divider"></li>
+			<li><a href="$logout_href" rel="noinde,nofollow">$logout</a></li>
+EOF;
+}
+
+function account_menu_ajax(){
+	die((is_user_logged_in()) ? logout_menu() : login_menu());
+}
+
