@@ -61,6 +61,16 @@ function my_theme_custom_init(){
 add_action('after_setup_theme', 'my_theme_custom_init');
 
 /**
+ * Wraps the more link into a <p> with text-align: right; 
+ * @param unknown $content
+ * @return string
+ */
+function add_align_right_to_more_link($content){
+	return HtmlHelper::paragraph($content, array('class'=>'text-right'));
+}
+add_filter('the_content_more_link', 'add_align_right_to_more_link');
+
+/**
  * Adds some social icons using AddThis service
  */
 function my_theme_socials(){

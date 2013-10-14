@@ -29,6 +29,8 @@ ThemeHelpers::load_js('bootstrap');
 	?>
 		
 	<?php //get_template_part(WORDPRESS_THEME_UTILS_PARTIALS_RELATIVE_PATH.'sidebar'); ?>
+	
+	<?php get_template_part(WORDPRESS_THEME_UTILS_PARTIALS_RELATIVE_PATH.'pagination'); ?>
 
 <?php 
 	get_template_part(WORDPRESS_THEME_UTILS_PARTIALS_RELATIVE_PATH.'footer'); 

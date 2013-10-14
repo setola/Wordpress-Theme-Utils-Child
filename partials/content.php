@@ -17,7 +17,7 @@ $tpl = <<< EOF
 
 <article id="post-%post_id%" class="%post_class%">
 	<div class="container">
-		<header class="header">
+		<header class="%header_class%">
 			<h1>%title%</h1>
 		</header>
 		<div class="entry-meta">
@@ -35,7 +35,7 @@ EOF;
 
 // add a link as the post title only if we're not reading the single post
 $title = get_the_title();
-if(!is_singular()) $title = HtmlHelper::anchor(get_permalink(), $title);
+if(!is_singular()) $title = HtmlHelper::anchor(get_permalink(), $title, array('title'=>$title));
 
 
 $more_link = 
@@ -64,10 +64,28 @@ if($categories){
 	$metas[] = HtmlHelper::span('', array('class'=>$icon_class.' glyphicon-folder-open')).$separator.$categories;
 }
 
+$tag_number = count(get_the_tags());
 $tags = get_the_tag_list('', ', ');
 if($tags){
-	$metas[] = HtmlHelper::span('', array('class'=>$icon_class.' glyphicon-tags')).$separator.get_the_tag_list('', ', ');
+	$tag_class = ($tag_number == 1) ? 'glyphicon-tag' : 'glyphicon-tags';
+	$metas[] = HtmlHelper::span('', array('class'=>$icon_class.' '.$tag_class)).$separator.get_the_tag_list('', ', ');
 }
+
+if(comments_open()){
+	$comments_icon = HtmlHelper::span('', array('class'=>$icon_class.' glyphicon-comment'));
+	$comments = get_comments_number();
+	if($comments == 0){
+		$write_comments .= __('No comments yet', 'theme');
+	} else {
+		$write_comments .= sprintf(_n('1 comment', '%s comments', $comments, 'theme'), $comments);
+	}
+	$metas[] = $comments_icon.$separator.HtmlHelper::anchor(get_comments_link(), $write_comments);
+} else {
+	$write_comments =  __('Comments off', 'theme');
+}
+
+$author = HtmlHelper::anchor(get_the_author_link(), get_the_author());
+$metas[] = HtmlHelper::span('', array('class'=>$icon_class.' glyphicon-user')).$separator.$author;
 
 $thumbnail = '';
 if(function_exists('has_post_thumbnail') && has_post_thumbnail() && ! post_password_required()){
@@ -85,9 +103,10 @@ echo $subs
 	->set_tpl($tpl)
 	->set_markup('post_id', get_the_ID())
 	->set_markup('post_class', join(' ', $post_classes))
+	->set_markup('header_class', is_singular() ? 'page-header' : 'header')
 	->set_markup('title', $title)
 	->set_markup('thumbnail', $thumbnail)
-	->set_markup('metas', HtmlHelper::unorderd_list($metas, array('class'=>'list-inline')))
+	->set_markup('metas', HtmlHelper::unorderd_list($metas, array('class'=>'list-inline entry-meta')))
 	->set_markup('content', apply_filters('the_content', get_the_content($more_link)))
 	->replace_markup();
 
