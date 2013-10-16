@@ -55,7 +55,11 @@ function my_theme_custom_init(){
 	);
 	MediaManager::set_media_list('photogallery', $photogallery_config);
 	
-	
+	// The MediaManager saves a shortcode in a post meta.
+	// Here we bind the functions for rendering the various gallery types
+	add_shortcode($slideshow_config['shortcode'], 'slideshow_gallery_shortcode');
+	add_shortcode($minigallery_config['shortcode'], 'minigallery_gallery_shortcode');
+	add_shortcode($photogallery_config['shortcode'], 'photogallery_gallery_shortcode');
 	
 }
 add_action('after_setup_theme', 'my_theme_custom_init');
@@ -238,6 +242,121 @@ add_filter( 'image_send_to_editor', 'my_theme_img_tag_filter', 10, 9 );
 
 
 
+
+if(!function_exists('photogallery_gallery_shortcode')){
+	function photogallery_gallery_shortcode($atts){
+		$data = shortcode_atts(array('ids' => ''), $atts);
+		$ids = explode(',', $data['ids']);
+		$minigallery = new MinigalleryThumbsLinkToBig();
+
+		return $minigallery
+		->set_template('<div class="photogallery-container clearfix">%list%</div>')
+		->set_uid('photogallery')
+		->set_wp_media_dimension('photogallery_small')
+		->set_wp_media_dimension_big('big_gallery')
+		->add_images($ids)
+		->the_markup();
+	}
+}
+
+if(!function_exists('minigallery_gallery_shortcode')){
+	function minigallery_gallery_shortcode($atts){
+		$data = shortcode_atts(array('ids' => ''), $atts );
+		$ids = explode(',', $data['ids']);
+		$minigallery = new MinigalleryThumbsLinkToBig();
+
+		return $minigallery
+		->set_template('%prev%<div
+				class="images-container cycle-slideshow"
+				data-cycle-fx=carousel
+				data-cycle-timeout=1000
+				data-cycle-carousel-visible=3
+				data-cycle-next="#minigallery .control.next"
+				data-cycle-prev="#minigallery .control.prev"
+				data-cycle-slides="> a">%list%</div>%next%')
+				->set_uid('minigallery')
+				->set_wp_media_dimension('minigallery')
+				->set_wp_media_dimension_big('big_gallery')
+				->add_images($ids)
+				->the_markup();
+	}
+}
+
+
+if(!function_exists('slideshow_gallery_shortcode')){
+	function slideshow_gallery_shortcode($atts){
+		$gallery 	= new BootstrapCarousel();
+		$data 		= shortcode_atts(array('ids' => ''), $atts );
+		$ids 		= explode(',', $data['ids']);
+
+		return $gallery
+			->set_uid('slideshow')
+			->set_wp_media_dimension(is_front_page() ? 'slideshow-frontpage' : 'slideshow')
+			->add_images($ids)
+			->get_markup();
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// TODO
 function login_menu(){
 	$tpl = <<<EOF
 		<form class="inline-form login-form margin-form" action="%action%" method="post">
