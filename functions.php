@@ -62,6 +62,7 @@ function my_theme_custom_init(){
 	add_shortcode($photogallery_config['shortcode'], 'photogallery_gallery_shortcode');
 	
 	add_image_size('feature', 500, 500, true);
+	add_theme_support('post-thumbnails');
 	
 }
 add_action('after_setup_theme', 'my_theme_custom_init');
@@ -321,6 +322,9 @@ function preview_shortcode($atts, $content=null){
 		global $post;
 		$post = get_post($data['id']);
 		setup_postdata($post);
+		$data['cta_url'] = intval($data['id']);
+		if(has_post_thumbnail($data['id'])) $data['image'] = get_post_thumbnail_id($data['id']);
+		$data['title'] = get_the_title();
 	}
 	
 	$tpl = <<< EOF
@@ -362,7 +366,7 @@ EOF;
 		->set_markup('class', $data['class'])
 		->set_markup('image', $image)
 		->set_markup('title', HtmlHelper::standard_tag('h2', $data['title']))
-		->set_markup('description', apply_filters('the_content', $content))
+		->set_markup('description', HtmlHelper::paragraph($content))
 		->set_markup('cta', empty($href) ? '' : HtmlHelper::anchor($href, $data['cta_text'], array('class'=>'btn btn-default')))
 		->replace_markup();
 }
@@ -377,7 +381,7 @@ function feature_shortcode($atts, $content=null){
 			'subtitle'		=>	'',
 			'description'	=>	'',
 			'image'			=>	'',
-			'image-class'	=>	'img-thumbnail img-responsive',
+			'image-class'	=>	'img-thumbnail img-responsive aligncenter',
 			'img_position'	=>	'left',
 			'cta_text'		=>	__('Read More', 'theme'),
 			'cta_url'		=>	'',

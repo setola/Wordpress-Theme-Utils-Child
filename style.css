@@ -31,6 +31,10 @@ a:focus {
 	outline: 0;
 }
 
+p:empty {
+	margin: 0;
+}
+
 .admin-bar .navbar-fixed-top {
 	margin-top: 28px;
 }
