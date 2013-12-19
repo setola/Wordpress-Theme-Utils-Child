@@ -16,7 +16,7 @@ echo MediaManager::get_gallery('slideshow');
 
 while(have_posts()){
 	the_post();
-	get_template_part(WORDPRESS_THEME_UTILS_PARTIALS_RELATIVE_PATH.'content', get_post_type());
+	get_template_part(WORDPRESS_THEME_UTILS_PARTIALS_RELATIVE_PATH.'content', get_post_type().'-notitle');
 }
 
 get_template_part(WORDPRESS_THEME_UTILS_PARTIALS_RELATIVE_PATH.'footer'); 

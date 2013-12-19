@@ -20,18 +20,18 @@ ThemeHelpers::load_js('bootstrap');
 <?php get_template_part(WORDPRESS_THEME_UTILS_PARTIALS_RELATIVE_PATH.'header'); ?>
 
 <?php get_template_part(WORDPRESS_THEME_UTILS_PARTIALS_RELATIVE_PATH.'navbar'); ?>
-
-	<?php 
-		while(have_posts()){
-			the_post(); 
-			get_template_part(WORDPRESS_THEME_UTILS_PARTIALS_RELATIVE_PATH.'content', get_post_format());
-		}
-	?>
+	<div class="container">
+		<?php 
+			while(have_posts()){
+				the_post(); 
+				get_template_part(WORDPRESS_THEME_UTILS_PARTIALS_RELATIVE_PATH.'content', get_post_format());
+			}
+		?>
+			
+		<?php //get_template_part(WORDPRESS_THEME_UTILS_PARTIALS_RELATIVE_PATH.'sidebar'); ?>
 		
-	<?php //get_template_part(WORDPRESS_THEME_UTILS_PARTIALS_RELATIVE_PATH.'sidebar'); ?>
-	
-	<?php get_template_part(WORDPRESS_THEME_UTILS_PARTIALS_RELATIVE_PATH.'pagination'); ?>
-
+		<?php get_template_part(WORDPRESS_THEME_UTILS_PARTIALS_RELATIVE_PATH.'pagination'); ?>
+	</div>
 <?php 
 	get_template_part(WORDPRESS_THEME_UTILS_PARTIALS_RELATIVE_PATH.'footer'); 
 ?>

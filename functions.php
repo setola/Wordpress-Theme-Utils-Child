@@ -61,6 +61,8 @@ function my_theme_custom_init(){
 	add_shortcode($minigallery_config['shortcode'], 'minigallery_gallery_shortcode');
 	add_shortcode($photogallery_config['shortcode'], 'photogallery_gallery_shortcode');
 	
+	add_image_size('feature', 500, 500, true);
+	
 }
 add_action('after_setup_theme', 'my_theme_custom_init');
 
@@ -299,6 +301,157 @@ if(!function_exists('slideshow_gallery_shortcode')){
 
 
 
+
+function preview_shortcode($atts, $content=null){
+	$data 		= shortcode_atts(
+		array(
+			'id' 			=>	'',
+			'title'			=>	'',
+			'description'	=>	'',
+			'image'			=>	'',
+			'image-class'	=>	'img-circle',
+			'cta_text'		=>	__('Read More', 'theme'),
+			'cta_url'		=>	'',
+			'class'			=>	'col-lg-4 col-xs-12 col-md-4 aligncenter preview'
+		), 
+		$atts 
+	);
+	
+	if(!empty($data['id'])){
+		global $post;
+		$post = get_post($data['id']);
+		setup_postdata($post);
+	}
+	
+	$tpl = <<< EOF
+	
+	<div class="%class%">
+		%image%
+		%title%
+		%description%
+		%cta%
+	</div>
+	
+EOF;
+	
+	// build the image
+	$image = '';
+	if(is_numeric($data['image'])){
+		$img_src = wp_get_attachment_image_src($data['image']);
+		$img_src = $img_src[0];
+	} elseif(is_string($data['image'])){
+		$img_src = $data['image'];
+	} elseif(has_post_thumbnail($data['id'])) {
+		$img_src = wp_get_attachment_image_src(get_post_thumbnail_id($data['id']));
+	}
+	
+	$image = HtmlHelper::image($img_src, array('class'=>$data['image-class']));
+	
+	// build the href for the call to action
+	$href = '';
+	if(is_numeric($data['cta_url'])) {
+		$href = get_permalink($data['cta_url']);
+	} elseif(is_string($data['cta_url'])){
+		$href = $data['cta_url'];
+	}
+	
+	$subs = new SubstitutionTemplate();
+	
+	return $subs
+		->set_tpl($tpl)
+		->set_markup('class', $data['class'])
+		->set_markup('image', $image)
+		->set_markup('title', HtmlHelper::standard_tag('h2', $data['title']))
+		->set_markup('description', apply_filters('the_content', $content))
+		->set_markup('cta', empty($href) ? '' : HtmlHelper::anchor($href, $data['cta_text'], array('class'=>'btn btn-default')))
+		->replace_markup();
+}
+add_shortcode('preview', 'preview_shortcode');
+
+
+function feature_shortcode($atts, $content=null){
+	$data 		= shortcode_atts(
+		array(
+			'id' 			=>	'',
+			'title'			=>	'',
+			'subtitle'		=>	'',
+			'description'	=>	'',
+			'image'			=>	'',
+			'image-class'	=>	'img-thumbnail img-responsive',
+			'img_position'	=>	'left',
+			'cta_text'		=>	__('Read More', 'theme'),
+			'cta_url'		=>	'',
+			'class'			=>	'row featurette',
+			'text_wrapper_class'	=>	'col-md-7',
+			'image_wrapper_class'	=>	'col-md-5'
+		), 
+		$atts 
+	);
+	
+	if(!empty($data['id'])){
+		global $post;
+		$post = get_post($data['id']);
+		setup_postdata($post);
+	}
+	
+	$tpl = $data['img_position'] == 'left' 
+		?	<<< EOF
+	
+	<div class="%class%">
+		%image%
+		%text%
+	</div>
+	
+EOF
+		:	<<< EOF
+	
+	<div class="%class%">
+		%text%
+		%image%
+	</div>
+	
+EOF;
+	
+	
+	// build the image
+	$image = '';
+	if(is_numeric($data['image'])){
+		$img_src = wp_get_attachment_image_src($data['image'], 'feature');
+		$img_src = $img_src[0];
+	} elseif(is_string($data['image'])){
+		$img_src = $data['image'];
+	} elseif(has_post_thumbnail($data['id'])) {
+		$img_src = wp_get_attachment_image_src(get_post_thumbnail_id($data['id']), 'feature');
+	}
+	
+	$image = HtmlHelper::image($img_src, array('class'=>$data['image-class']));
+	
+	// build the href for the call to action
+	$href = '';
+	if(is_numeric($data['cta_url'])) {
+		$href = get_permalink($data['cta_url']);
+	} elseif(is_string($data['cta_url'])){
+		$href = $data['cta_url'];
+	}
+	
+	// build up some text
+	$subtitle = HtmlHelper::span($data['subtitle'], array('class'=>'text-muted'));
+	$title = HtmlHelper::standard_tag('h2', $data['title'].' '.$subtitle);
+	$description = HtmlHelper::paragraph($content, array('class'=>'lead'));
+	$cta = empty($href) ? '' : HtmlHelper::anchor($href, $data['cta_text'], array('class'=>'btn btn-default'));
+	
+	$text = HtmlHelper::div($title.$description.$cta, array('class'=>$data['text_wrapper_class']));
+	
+	$subs = new SubstitutionTemplate();
+	
+	return $subs
+		->set_tpl($tpl)
+		->set_markup('class', $data['class'])
+		->set_markup('image', HtmlHelper::div($image, array('class'=>$data['image_wrapper_class'])))
+		->set_markup('text', $text)
+		->replace_markup();
+}
+add_shortcode('feature', 'feature_shortcode');
 
 
 
