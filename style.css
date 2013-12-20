@@ -139,6 +139,32 @@ img.alignnone {
 	font-weight: normal;
 }
 
+.preview .img-anchor img {
+	-webkit-transition: all 0.8s ease-in-out;
+	-moz-transition: all 0.8s ease-in-out;
+	-o-transition: all 0.8s ease-in-out;
+	-ms-transition: all 0.8s ease-in-out;
+	transition: all 0.8s ease-in-out;
+}
+
+.preview .img-anchor:hover img {
+	-webkit-transform: scale(1.2) rotate(2deg);
+	-moz-transform: scale(1.2) rotate(2deg);
+	-o-transform: scale(1.2) rotate(2deg);
+	-ms-transform: scale(1.2) rotate(2deg);
+	transform: scale(1.2) rotate(2deg);
+}
+
+.preview .img-anchor {
+	border-radius: 50%;
+	border: 5px solid #fff;
+	overflow: hidden;
+	width: 150px;
+	height: 150px;
+	display: block;
+	margin: auto;
+}
+
 .featurette-divider {
 	margin: 80px 0;
 	border-color: #ccc;

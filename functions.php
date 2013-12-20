@@ -308,11 +308,12 @@ function preview_shortcode($atts, $content=null){
 		array(
 			'id' 			=>	'',
 			'title'			=>	'',
-			'description'	=>	'',
 			'image'			=>	'',
 			'image-class'	=>	'img-circle',
 			'cta_text'		=>	__('Read More', 'theme'),
 			'cta_url'		=>	'',
+			'cta_class'		=>	'btn-primary',
+			'cta_target'	=>	'',
 			'class'			=>	'col-lg-4 col-xs-12 col-md-4 aligncenter preview'
 		), 
 		$atts 
@@ -338,6 +339,14 @@ function preview_shortcode($atts, $content=null){
 	
 EOF;
 	
+	// build the href for the call to action
+	$href = '';
+	if(is_numeric($data['cta_url'])) {
+		$href = get_permalink($data['cta_url']);
+	} elseif(is_string($data['cta_url'])){
+		$href = $data['cta_url'];
+	}
+	
 	// build the image
 	$image = '';
 	if(is_numeric($data['image'])){
@@ -350,14 +359,8 @@ EOF;
 	}
 	
 	$image = HtmlHelper::image($img_src, array('class'=>$data['image-class']));
+	$image = HtmlHelper::anchor($href, $image, array('class'=>'img-anchor'));
 	
-	// build the href for the call to action
-	$href = '';
-	if(is_numeric($data['cta_url'])) {
-		$href = get_permalink($data['cta_url']);
-	} elseif(is_string($data['cta_url'])){
-		$href = $data['cta_url'];
-	}
 	
 	$subs = new SubstitutionTemplate();
 	
@@ -367,7 +370,16 @@ EOF;
 		->set_markup('image', $image)
 		->set_markup('title', HtmlHelper::standard_tag('h2', $data['title']))
 		->set_markup('description', HtmlHelper::paragraph($content))
-		->set_markup('cta', empty($href) ? '' : HtmlHelper::anchor($href, $data['cta_text'], array('class'=>'btn btn-default')))
+		->set_markup('cta', empty($href) 
+			? '' 
+			: HtmlHelper::anchor(
+					$href, 
+					$data['cta_text'], 
+					array(
+						'class'=>'btn '.$data['cta_class'], 
+						'target'=>$data['cta_target'])
+			)
+		)
 		->replace_markup();
 }
 add_shortcode('preview', 'preview_shortcode');
@@ -458,14 +470,16 @@ EOF;
 add_shortcode('feature', 'feature_shortcode');
 
 
+function row_shortcode($atts, $content=null){
+	return HtmlHelper::div(do_shortcode($content), array('class'=>'row'));
+}
+add_shortcode('row', 'row_shortcode');
 
 
-
-
-
-
-
-
+// Sorry folks... I love wpautop but it breaks every shortcode... sob sigh sob...
+remove_filter( 'the_content', 'wpautop' );
+//add_filter( 'the_content', 'wpautop' , 99);
+//add_filter( 'the_content', 'shortcode_unautop',100 );
 
 
 
