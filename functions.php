@@ -243,66 +243,140 @@ function my_theme_img_tag_filter($html, $id, $caption, $title, $align, $url, $si
 }
 add_filter( 'image_send_to_editor', 'my_theme_img_tag_filter', 10, 9 );
 
-
-
-
-if(!function_exists('photogallery_gallery_shortcode')){
-	function photogallery_gallery_shortcode($atts){
-		$data = shortcode_atts(array('ids' => ''), $atts);
-		$ids = explode(',', $data['ids']);
-		$minigallery = new MinigalleryThumbsLinkToBig();
-
-		return $minigallery
-		->set_template('<div class="photogallery-container clearfix">%list%</div>')
-		->set_uid('photogallery')
-		->set_wp_media_dimension('photogallery_small')
-		->set_wp_media_dimension_big('big_gallery')
-		->add_images($ids)
-		->the_markup();
+/**
+ * Retrieves an <ul> of post metas
+ * @param string $post the post
+ */
+function my_theme_post_meta_list($post=null){
+	if(is_null($post)) global $post;
+	setup_postdata($post);
+	
+	$icon_class = 'glyphicon';
+	$separator = '&nbsp;&nbsp;';
+	$metas = array();
+	
+	$date = get_the_date();
+	if($date){
+		$metas[] = HtmlHelper::span('', array('class'=>$icon_class.' glyphicon-time')).$separator.$date;
 	}
+	
+	$categories = get_the_category_list(', ');
+	if($categories){
+		$metas[] = HtmlHelper::span('', array('class'=>$icon_class.' glyphicon-folder-open')).$separator.$categories;
+	}
+	
+	$tag_number = count(get_the_tags());
+	$tags = get_the_tag_list('', ', ');
+	if($tags){
+		$tag_class = ($tag_number == 1) ? 'glyphicon-tag' : 'glyphicon-tags';
+		$metas[] = HtmlHelper::span('', array('class'=>$icon_class.' '.$tag_class)).$separator.get_the_tag_list('', ', ');
+	}
+	
+	if(comments_open()){
+		$comments_icon = HtmlHelper::span('', array('class'=>$icon_class.' glyphicon-comment'));
+		$comments = get_comments_number();
+		if($comments == 0){
+			$write_comments .= __('No comments yet', 'theme');
+		} else {
+			$write_comments .= sprintf(_n('1 comment', '%s comments', $comments, 'theme'), $comments);
+		}
+		$metas[] = $comments_icon.$separator.HtmlHelper::anchor(get_comments_link(), $write_comments);
+	} else {
+		$write_comments =  __('Comments off', 'theme');
+	}
+	
+	$author = HtmlHelper::anchor(get_the_author_link(), get_the_author());
+	$metas[] = HtmlHelper::span('', array('class'=>$icon_class.' glyphicon-user')).$separator.$author;
+	
+	wp_reset_postdata();
+	
+	return HtmlHelper::unorderd_list($metas, array('class'=>'list-inline entry-meta'));
 }
 
-if(!function_exists('minigallery_gallery_shortcode')){
-	function minigallery_gallery_shortcode($atts){
-		$data = shortcode_atts(array('ids' => ''), $atts );
-		$ids = explode(',', $data['ids']);
-		$minigallery = new MinigalleryThumbsLinkToBig();
 
-		return $minigallery
-		->set_template('%prev%<div
-				class="images-container cycle-slideshow"
-				data-cycle-fx=carousel
-				data-cycle-timeout=1000
-				data-cycle-carousel-visible=3
-				data-cycle-next="#minigallery .control.next"
-				data-cycle-prev="#minigallery .control.prev"
-				data-cycle-slides="> a">%list%</div>%next%')
-				->set_uid('minigallery')
-				->set_wp_media_dimension('minigallery')
-				->set_wp_media_dimension_big('big_gallery')
-				->add_images($ids)
-				->the_markup();
-	}
+/**
+ * Callback for the photogallery MediaManager set
+ * Also callable with [photogallery] shortcode
+ * @param unknown $atts
+ */
+function photogallery_gallery_shortcode($atts){
+	$data = shortcode_atts(array('ids' => ''), $atts);
+	$ids = explode(',', $data['ids']);
+	$minigallery = new MinigalleryThumbsLinkToBig();
+
+	return $minigallery
+	->set_template('<div class="photogallery-container clearfix">%list%</div>')
+	->set_uid('photogallery')
+	->set_wp_media_dimension('photogallery_small')
+	->set_wp_media_dimension_big('big_gallery')
+	->add_images($ids)
+	->the_markup();
 }
 
 
-if(!function_exists('slideshow_gallery_shortcode')){
-	function slideshow_gallery_shortcode($atts){
-		$gallery 	= new BootstrapCarousel();
-		$data 		= shortcode_atts(array('ids' => ''), $atts );
-		$ids 		= explode(',', $data['ids']);
+/**
+ * Callback for the minigallery MediaManager set
+ * Also callable with [minigallery] shortcode
+ * @param unknown $atts
+ */
+function minigallery_gallery_shortcode($atts){
+	$data = shortcode_atts(array('ids' => ''), $atts );
+	$ids = explode(',', $data['ids']);
+	$minigallery = new MinigalleryThumbsLinkToBig();
 
-		return $gallery
-			->set_uid('slideshow')
-			->set_wp_media_dimension(is_front_page() ? 'slideshow-frontpage' : 'slideshow')
+	return $minigallery
+	->set_template('%prev%<div
+			class="images-container cycle-slideshow"
+			data-cycle-fx=carousel
+			data-cycle-timeout=1000
+			data-cycle-carousel-visible=3
+			data-cycle-next="#minigallery .control.next"
+			data-cycle-prev="#minigallery .control.prev"
+			data-cycle-slides="> a">%list%</div>%next%')
+			->set_uid('minigallery')
+			->set_wp_media_dimension('minigallery')
+			->set_wp_media_dimension_big('big_gallery')
 			->add_images($ids)
-			->get_markup();
-	}
+			->the_markup();
+}
+
+/**
+ * Callback for the slideshow MediaManager set
+ * Also callable with shortcode [slideshow]
+ * @param unknown $atts
+ * @return Ambigous <the, mixed>
+ */
+function slideshow_gallery_shortcode($atts){
+	$gallery 	= new BootstrapCarousel();
+	$data 		= shortcode_atts(array('ids' => ''), $atts );
+	$ids 		= explode(',', $data['ids']);
+
+	return $gallery
+		->set_uid('slideshow')
+		->set_wp_media_dimension(is_front_page() ? 'slideshow-frontpage' : 'slideshow')
+		->add_images($ids)
+		->get_markup();
 }
 
 
 
-
+/**
+ * Manages the [preview] shortcode
+ * parameters:
+ * 	'id' 			=>	'',
+ * 	'title'			=>	'',
+ * 	'image'			=>	'',
+ * 	'image-class'	=>	'img-circle',
+ * 	'cta_text'		=>	__('Read More', 'theme'),
+ * 	'cta_url'		=>	'',
+ * 	'cta_class'		=>	'btn-primary',
+ * 	'cta_target'	=>	'',
+ * 	'class'			=>	'col-lg-4 col-xs-12 col-md-4 aligncenter preview'
+ * 
+ * @param unknown $atts
+ * @param string $content
+ * @return mixed
+ */
 function preview_shortcode($atts, $content=null){
 	$data 		= shortcode_atts(
 		array(
@@ -384,7 +458,26 @@ EOF;
 }
 add_shortcode('preview', 'preview_shortcode');
 
-
+/**
+ * Manages the [feature] shortcode
+ * Parameters:
+ * 	'id' 			=>	'',
+ * 	'title'			=>	'',
+ * 	'subtitle'		=>	'',
+ * 	'description'	=>	'',
+ * 	'image'			=>	'',
+ * 	'image-class'	=>	'img-thumbnail img-responsive aligncenter',
+ * 	'img_position'	=>	'left',
+ * 	'cta_text'		=>	__('Read More', 'theme'),
+ * 	'cta_url'		=>	'',
+ * 	'class'			=>	'row featurette',
+ * 	'text_wrapper_class'	=>	'col-md-7',
+ * 	'image_wrapper_class'	=>	'col-md-5'
+ * 
+ * @param unknown $atts
+ * @param string $content
+ * @return mixed
+*/
 function feature_shortcode($atts, $content=null){
 	$data 		= shortcode_atts(
 		array(
@@ -469,6 +562,22 @@ EOF;
 }
 add_shortcode('feature', 'feature_shortcode');
 
+/**
+ * Manages the [divider] shortcode
+ * @param unknown $atts
+ * @param string $content the inner content
+ * @return string html markup
+ */
+function divider_shortcode($atts, $content=null){
+	$data 		= shortcode_atts(
+		array(
+			'class'		=>	'featurette-divider'
+		),
+		$atts
+	);
+	return HtmlHelper::standard_tag('hr', '', array('class'=>$data['class']));
+}
+add_shortcode('divider', 'divider_shortcode');
 
 function row_shortcode($atts, $content=null){
 	return HtmlHelper::div(do_shortcode($content), array('class'=>'row'));

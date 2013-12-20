@@ -49,43 +49,7 @@ $more_link =
 $post_classes = get_post_class('entry-content', $post_id);
 //if(in_array('sticky', $post_classes)) $post_classes[] = 'jumbotron';
 
-// Let's add some usefull information about the current post
-$icon_class = 'glyphicon';
-$separator = '&nbsp;&nbsp;';
-$metas = array();
 
-$date = get_the_date();
-if($date){
-	$metas[] = HtmlHelper::span('', array('class'=>$icon_class.' glyphicon-time')).$separator.$date;
-}
-
-$categories = get_the_category_list(', ');
-if($categories){
-	$metas[] = HtmlHelper::span('', array('class'=>$icon_class.' glyphicon-folder-open')).$separator.$categories;
-}
-
-$tag_number = count(get_the_tags());
-$tags = get_the_tag_list('', ', ');
-if($tags){
-	$tag_class = ($tag_number == 1) ? 'glyphicon-tag' : 'glyphicon-tags';
-	$metas[] = HtmlHelper::span('', array('class'=>$icon_class.' '.$tag_class)).$separator.get_the_tag_list('', ', ');
-}
-
-if(comments_open()){
-	$comments_icon = HtmlHelper::span('', array('class'=>$icon_class.' glyphicon-comment'));
-	$comments = get_comments_number();
-	if($comments == 0){
-		$write_comments .= __('No comments yet', 'theme');
-	} else {
-		$write_comments .= sprintf(_n('1 comment', '%s comments', $comments, 'theme'), $comments);
-	}
-	$metas[] = $comments_icon.$separator.HtmlHelper::anchor(get_comments_link(), $write_comments);
-} else {
-	$write_comments =  __('Comments off', 'theme');
-}
-
-$author = HtmlHelper::anchor(get_the_author_link(), get_the_author());
-$metas[] = HtmlHelper::span('', array('class'=>$icon_class.' glyphicon-user')).$separator.$author;
 
 $thumbnail = '';
 if(function_exists('has_post_thumbnail') && has_post_thumbnail() && ! post_password_required()){
@@ -106,7 +70,7 @@ echo $subs
 	->set_markup('header_class', is_singular() ? 'page-header' : 'header')
 	->set_markup('title', $title)
 	->set_markup('thumbnail', $thumbnail)
-	->set_markup('metas', HtmlHelper::unorderd_list($metas, array('class'=>'list-inline entry-meta')))
+	->set_markup('metas', my_theme_post_meta_list())
 	->set_markup('content', apply_filters('the_content', get_the_content($more_link)))
 	->replace_markup();
 
