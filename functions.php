@@ -17,11 +17,14 @@ function my_theme_custom_init(){
 	// register some js and css
 	global $assets;
 	$assets = new DefaultAssetsCDN();
+	
+	$bootstrap_version = '3.1.0';
+	
 	$assets
-		->add_css('bootstrap', '//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css', null, '3.0.0', 'screen')
-		->add_css('bootstrap-theme', '//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css', array('bootstrap'), '3.0.0', 'screen')
+		->add_css('bootstrap', "//netdna.bootstrapcdn.com/bootstrap/$bootstrap_version/css/bootstrap.min.css", null, $bootstrap_version, 'screen')
+		->add_css('bootstrap-theme', "//netdna.bootstrapcdn.com/bootstrap/$bootstrap_version/css/bootstrap-theme.min.css", array('bootstrap'), $bootstrap_version, 'screen')
 		->add_css('style', '/style.css', array('bootstrap'), '1.0.0', 'screen')
-		->add_js('bootstrap', '//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js', array('jquery'), '3.0.0', true)
+		->add_js('bootstrap', "//netdna.bootstrapcdn.com/bootstrap/$bootstrap_version/js/bootstrap.min.js", array('jquery'), $bootstrap_version, true)
 		->add_js('addthis', '//s7.addthis.com/js/300/addthis_widget.js#pubid=xa-5142f4961c6fb998', null, null, true);
 	
 	// use v() vd() vc() functions
@@ -586,7 +589,7 @@ add_shortcode('row', 'row_shortcode');
 
 
 // Sorry folks... I love wpautop but it breaks every shortcode... sob sigh sob...
-remove_filter( 'the_content', 'wpautop' );
+//remove_filter( 'the_content', 'wpautop' );
 //add_filter( 'the_content', 'wpautop' , 99);
 //add_filter( 'the_content', 'shortcode_unautop',100 );
 

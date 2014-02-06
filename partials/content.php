@@ -39,9 +39,9 @@ if(!is_singular()) $title = HtmlHelper::anchor(get_permalink(), $title, array('t
 
 
 $more_link = 
-	'<button type="button" class="btn btn-default">'
+	'<a type="button" class="btn btn-default">'
 	.sprintf(__('<small>Read More on</small> <strong>%s</strong>', 'theme'), get_the_title())
-	.'</button>';
+	.'</a>';
 
 // for this theme the sticky post is displayed as a bootstrap jumbotron.
 // to mantain the css as clean as possible, let's add the jumbotron class

@@ -169,3 +169,9 @@ img.alignnone {
 	margin: 80px 0;
 	border-color: #ccc;
 }
+
+a.btn{
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 100%;
+}
