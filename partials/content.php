@@ -14,22 +14,22 @@
 
 
 $tpl = <<< EOF
-
-<article id="post-%post_id%" class="%post_class%">
-	<div class="container">
-		<header class="%header_class%">
-			<h1>%title%</h1>
-		</header>
-		<div class="entry-meta">
-			%metas%
+<div class=" col-lg-6 col-md-6 col-sm-12 col-xs-12">
+	<article id="post-%post_id%" class="%post_class%">
+		<div class="clearfix">
+			<header class="%header_class%">
+				<h1>%title%</h1>
+			</header>
+			<div class="entry-meta">
+				%metas%
+			</div>
+			%thumbnail%
+			<div class="content">
+				%content%
+			</div>
 		</div>
-		%thumbnail%
-		<div class="content">
-			%content%
-		</div>
-	</div>
-</article>
-
+	</article>
+</div>
 
 EOF;
 
