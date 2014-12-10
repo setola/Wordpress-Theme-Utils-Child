@@ -150,6 +150,8 @@ function my_theme_caption($val, $attr, $content){
 					(array)$attr['caption']
 			)
 	);
+
+	$style = '';
 	
 	// fix for having the aligncenter class properly working
 	// (css 'margin: auto' property requires a known width element)
@@ -278,6 +280,7 @@ function my_theme_post_meta_list($post=null){
 	if(comments_open()){
 		$comments_icon = HtmlHelper::span('', array('class'=>$icon_class.' glyphicon-comment'));
 		$comments = get_comments_number();
+		$write_comments = '';
 		if($comments == 0){
 			$write_comments .= __('No comments yet', 'theme');
 		} else {

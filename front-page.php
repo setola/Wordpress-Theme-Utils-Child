@@ -13,10 +13,16 @@ get_template_part(WORDPRESS_THEME_UTILS_PARTIALS_RELATIVE_PATH.'header');
 get_template_part(WORDPRESS_THEME_UTILS_PARTIALS_RELATIVE_PATH.'navbar');
 
 echo MediaManager::get_gallery('slideshow');
+?>
+<div class="container">
+	<div class="row">
+	<?php
+	while(have_posts()){
+		the_post();
+		get_template_part(WORDPRESS_THEME_UTILS_PARTIALS_RELATIVE_PATH.'content', get_post_type().'-notitle');
+	}
+	?>
+	</div>
+</div>
 
-while(have_posts()){
-	the_post();
-	get_template_part(WORDPRESS_THEME_UTILS_PARTIALS_RELATIVE_PATH.'content', get_post_type().'-notitle');
-}
-
-get_template_part(WORDPRESS_THEME_UTILS_PARTIALS_RELATIVE_PATH.'footer'); 
+<?php get_template_part(WORDPRESS_THEME_UTILS_PARTIALS_RELATIVE_PATH.'footer');

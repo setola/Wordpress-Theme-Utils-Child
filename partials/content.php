@@ -14,7 +14,7 @@
 
 
 $tpl = <<< EOF
-<div class=" col-lg-6 col-md-6 col-sm-12 col-xs-12">
+<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
 	<article id="post-%post_id%" class="%post_class%">
 		<div class="clearfix">
 			<header class="%header_class%">
@@ -46,7 +46,7 @@ $more_link =
 // for this theme the sticky post is displayed as a bootstrap jumbotron.
 // to mantain the css as clean as possible, let's add the jumbotron class
 // if the current post is candidate for sticky class :)
-$post_classes = get_post_class('entry-content', $post_id);
+$post_classes = get_post_class('entry-content', get_the_ID());
 //if(in_array('sticky', $post_classes)) $post_classes[] = 'jumbotron';
 
 

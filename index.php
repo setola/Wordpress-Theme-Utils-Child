@@ -22,14 +22,10 @@ ThemeHelpers::load_js('bootstrap');
 <?php get_template_part(WORDPRESS_THEME_UTILS_PARTIALS_RELATIVE_PATH.'navbar'); ?>
 	<div class="container">
 		<div class="row">
-		<?php 
-			$k = 0;
+		<?php
 			while(have_posts()){
-				if($k>0 && $k%2==0) echo '</div><div class="row">';
-				$k++;
 				the_post(); 
 				get_template_part(WORDPRESS_THEME_UTILS_PARTIALS_RELATIVE_PATH.'content', get_post_format());
-				
 			}
 		?>
 		</div>
