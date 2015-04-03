@@ -6,6 +6,9 @@
  * @since 0.1
  */
 
+use WPTU\Core\Helpers\ThemeHelpers;
+use WPTU\Core\Metaboxes\MediaManager;
+
 ThemeHelpers::load_css('style');
 ThemeHelpers::load_js('bootstrap');
 

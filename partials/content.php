@@ -10,7 +10,8 @@
  * @since 0.1
  */
 
-0==0; //php doc workaround
+use WPTU\Core\Helpers\HtmlHelper;
+use WPTU\Core\Helpers\SubstitutionTemplate;
 
 
 $tpl = <<< EOF

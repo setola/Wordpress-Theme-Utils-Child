@@ -1,3 +1,18 @@
+<?php
+/**
+ * The navigation bar for our theme.
+ *
+ * Displays all of the top menu
+ *
+ * @package templates
+ * @subpackage parts
+ * @version 1.0.0
+ * @since 0.1
+ */
+
+use WPTU\Core\Helpers\HtmlHelper;
+
+?>
 <nav class="navbar navbar-default navbar-fixed-top navbar-inverse" role="navigation">
 	<div class="container">
 		<div class="navbar-header">

@@ -1,4 +1,7 @@
-<?php 
+<?php
+
+    use WPTU\Core\Helpers\HtmlHelper;
+
 	global $wp_query, $paged;
 		
 	$links = '';

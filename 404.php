@@ -7,6 +7,8 @@
  * @since 0.1
  */
 
+use WPTU\Core\Helpers\ThemeHelpers;
+
 ThemeHelpers::load_css('style');
 ThemeHelpers::load_js('bootstrap');
 ?>

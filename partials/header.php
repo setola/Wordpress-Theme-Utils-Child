@@ -10,6 +10,10 @@
  * @since 0.1
  */
 
+use WPTU\Core\Helpers\ThemeHelpers;
+use WPTU\Core\Helpers\HtmlHelper;
+use WPTU\Core\Helpers\HeadHelper;
+
 echo HtmlHelper::doctype('html5');
 echo HtmlHelper::open_html();
 
@@ -43,4 +47,4 @@ echo HtmlHelper::open_html();
       <script src="//cdnjs.cloudflare.com/ajax/libs/respond.js/1.3.0/respond.js"></script>
     <![endif]-->
 </head>
-<body <?php body_class(); ?>>
+<body <?php //body_class(); ?>>

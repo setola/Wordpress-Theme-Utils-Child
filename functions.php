@@ -1,13 +1,22 @@
-<?php 
+<?php
 
+use \WPTU\ThemeUtils;
+use \WPTU\Core\Assets\DefaultAssetsCDN;
+use \WPTU\Core\Metaboxes\MediaManager;
+use \WPTU\Core\Helpers\ThemeHelpers;
+use \WPTU\Core\Helpers\HtmlHelper;
+use WPTU\Core\Helpers\SubstitutionTemplate;
 
 function my_theme_custom_init(){
 	// initialize the framework
 	wtu_init();
 	
-	// Load the needed class the first time an object is instancied
-	ThemeUtils::enable_autoload_system();
-	
+	// Load the needed class the first time an object is instanced
+	ThemeUtils::enable_feature('Autoload');
+
+    // use v() vd() vc() functions
+	ThemeUtils::enable_feature('Debug');
+
 	// Let's say our theme has a main navigation menu
 	ThemeUtils::register_main_menu();
 	
@@ -28,10 +37,11 @@ function my_theme_custom_init(){
 		->add_js('addthis', '//s7.addthis.com/js/300/addthis_widget.js#pubid=xa-5142f4961c6fb998', null, null, true);
 	
 	// use v() vd() vc() functions
-	ThemeUtils::enable_debug();
+	//ThemeUtils::enable_debug();
 	
 	// we want to be able to have multiple groups of images to split in different gallery in a single page.
-	MediaManager::enable();
+    ThemeUtils::enable_feature('MediaManager');
+
 	$slideshow_config = array(
 			'label'		=>	__('Slideshow', 'wtu_framework'),
 			'shortcode'	=>	'slideshow',
@@ -693,5 +703,66 @@ EOF;
 
 function account_menu_ajax(){
 	die((is_user_logged_in()) ? logout_menu() : login_menu());
+}
+
+
+
+
+if(!function_exists('my_theme_accordion_shortcode')){
+	function my_theme_accordion_shortcode($atts, $content){
+		$data = shortcode_atts(array(), $atts);
+		return str_replace("\r\n", '', '<div class="panel-group">' . do_shortcode($content) . '</div>');
+	}
+
+	add_shortcode('accordion', 'my_theme_accordion_shortcode');
+}
+
+if(!function_exists('my_theme_accordion_element_shortcode')){
+	function my_theme_accordion_element_shortcode($atts, $content){
+		$data = shortcode_atts(
+			array(
+				'id'    =>  uniqid('accordion-element-'),
+				'in'    =>  '',
+				'question' =>  ''
+			),
+			$atts
+		);
+
+
+		$panel = new SubstitutionTemplate();
+		$panel->set_tpl(<<< EOF
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#%id%">
+                    %title%
+                </a>
+            </h4>
+        </div>
+        <div id="%id%" class="panel-collapse collapse %in%">
+            <div class="panel-body">
+                %body%
+            </div>
+        </div>
+    </div>
+EOF
+		)
+		      ->set_markup('pre', '<div class="panel-group">')
+		      ->set_markup('post', '</div>')
+		      ->set_markup('in', '');
+
+		$toret =  $panel
+			->minify_template()
+			->set_markup('id', $data['id'])
+			->set_markup('in', empty($data['in']) ? '' : 'in')
+			->set_markup('title', trim($data['question']))
+			->set_markup('body', do_shortcode($content))
+			->replace_markup();
+
+		return str_replace(array("\n","\r", "\r\n"), '', $toret);
+	}
+
+
+	add_shortcode('faq', 'my_theme_accordion_element_shortcode');
 }
 
