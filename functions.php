@@ -7,64 +7,97 @@ use \WPTU\Core\Helpers\ThemeHelpers;
 use \WPTU\Core\Helpers\HtmlHelper;
 use WPTU\Core\Helpers\SubstitutionTemplate;
 
-function my_theme_custom_init(){
+function my_theme_custom_init() {
 	// initialize the framework
 	wtu_init();
 	
 	// Load the needed class the first time an object is instanced
-	ThemeUtils::enable_feature('Autoload');
+	//ThemeUtils::enable_feature('Autoload');
 
-    // use v() vd() vc() functions
-	ThemeUtils::enable_feature('Debug');
+	// use v() vd() vc() functions
+	//ThemeUtils::enable_feature('Debug');
+
+	$bootstrap_version = '3.1.0';
+	ThemeUtils::getInstance()->enable_feature(
+		array(
+			ThemeUtils::FEATURE_AUTOLOAD,
+			ThemeUtils::FEATURE_DEBUG,
+			ThemeUtils::FEATURE_MEDIAMANAGER,
+			ThemeUtils::FEATURE_DUMMYCONTENT
+		)
+	)->set_assets_manager(new DefaultAssetsCDN());
+	
+	ThemeUtils::getInstance()
+		->get_assets_manager()
+		->add_css(
+			'bootstrap',
+			"//netdna.bootstrapcdn.com/bootstrap/$bootstrap_version/css/bootstrap.min.css",
+			null,
+			$bootstrap_version,
+			'screen'
+		)
+		->add_css(
+			'bootstrap-theme',
+			"//netdna.bootstrapcdn.com/bootstrap/$bootstrap_version/css/bootstrap-theme.min.css",
+			array('bootstrap'),
+			$bootstrap_version,
+			'screen'
+		)
+		->add_css('style', '/style.css', array('bootstrap'), '1.0.0', 'screen')
+		->add_js(
+			'bootstrap',
+			"//netdna.bootstrapcdn.com/bootstrap/$bootstrap_version/js/bootstrap.min.js",
+			array('jquery'),
+			$bootstrap_version,
+			true
+		)
+		->add_js('addthis', '//s7.addthis.com/js/300/addthis_widget.js#pubid=xa-5142f4961c6fb998', null, null, true);
 
 	// Let's say our theme has a main navigation menu
-	ThemeUtils::register_main_menu();
-	
+	register_nav_menu('primary', __('Primary Menu', 'theme'));
+
 	// and also a smaller menu on the footer
-	ThemeUtils::register_bottom_menu();
-	
-	// register some js and css
-	global $assets;
-	$assets = new DefaultAssetsCDN();
-	
-	$bootstrap_version = '3.1.0';
-	
-	$assets
-		->add_css('bootstrap', "//netdna.bootstrapcdn.com/bootstrap/$bootstrap_version/css/bootstrap.min.css", null, $bootstrap_version, 'screen')
-		->add_css('bootstrap-theme', "//netdna.bootstrapcdn.com/bootstrap/$bootstrap_version/css/bootstrap-theme.min.css", array('bootstrap'), $bootstrap_version, 'screen')
-		->add_css('style', '/style.css', array('bootstrap'), '1.0.0', 'screen')
-		->add_js('bootstrap', "//netdna.bootstrapcdn.com/bootstrap/$bootstrap_version/js/bootstrap.min.js", array('jquery'), $bootstrap_version, true)
-		->add_js('addthis', '//s7.addthis.com/js/300/addthis_widget.js#pubid=xa-5142f4961c6fb998', null, null, true);
-	
+	register_nav_menu('secondary', __('Secondary Menu', 'theme'));
+
+
 	// use v() vd() vc() functions
 	//ThemeUtils::enable_debug();
 	
 	// we want to be able to have multiple groups of images to split in different gallery in a single page.
-    ThemeUtils::enable_feature('MediaManager');
+	//ThemeUtils::enable_feature('MediaManager');
 
 	$slideshow_config = array(
-			'label'		=>	__('Slideshow', 'wtu_framework'),
-			'shortcode'	=>	'slideshow',
-			'wpml'		=>	array(
-					'default_lang'			=>	true,
-					'homepage'				=>	true,
-					'homepage_default_lang'	=>	true
-			),
-			'exclude'	=>	array('template-gallery.php', 'template-location.php', 'template-offers.php')
+		'label'     => __('Slideshow', 'wtu_framework'),
+		'shortcode' => 'slideshow',
+		'wpml'      => array(
+			'default_lang'          => true,
+			'homepage'              => true,
+			'homepage_default_lang' => true
+		),
+		'exclude'   => array(
+			'template-gallery.php',
+			'template-location.php',
+			'template-offers.php'
+		)
 	);
 	MediaManager::set_media_list('slideshow', $slideshow_config);
 	
 	$minigallery_config = array(
-			'label'		=>	__('Minigallery', 'wtu_framework'),
-			'shortcode'	=>	'minigallery',
-			'exclude'	=>	array('template-gallery.php', 'template-location.php', 'front-page.php', 'template-offers.php')
+		'label'     => __('Minigallery', 'wtu_framework'),
+		'shortcode' => 'minigallery',
+		'exclude'   => array(
+			'template-gallery.php',
+			'template-location.php',
+			'front-page.php',
+			'template-offers.php'
+		)
 	);
 	MediaManager::set_media_list('minigallery', $minigallery_config);
 	
 	$photogallery_config = array(
-			'label'		=>	__('Photogallery', 'wtu_framework'),
-			'shortcode'	=>	'photogallery',
-			'include'	=>	array('template-gallery.php')
+		'label'     => __('Photogallery', 'wtu_framework'),
+		'shortcode' => 'photogallery',
+		'include'   => array('template-gallery.php')
 	);
 	MediaManager::set_media_list('photogallery', $photogallery_config);
 	
@@ -78,58 +111,62 @@ function my_theme_custom_init(){
 	add_theme_support('post-thumbnails');
 	
 }
+
 add_action('after_setup_theme', 'my_theme_custom_init');
 
 /**
- * Wraps the more link into a <p> with text-align: right; 
+ * Wraps the more link into a <p> with text-align: right;
  * @param unknown $content
  * @return string
  */
-function add_align_right_to_more_link($content){
-	return HtmlHelper::paragraph($content, array('class'=>'text-right'));
+function add_align_right_to_more_link($content) {
+	return HtmlHelper::paragraph($content, array('class' => 'text-right'));
 }
+
 add_filter('the_content_more_link', 'add_align_right_to_more_link');
 
 /**
  * Adds some social icons using AddThis service
  */
-function my_theme_socials(){
+function my_theme_socials() {
 	?>
-		<div class="addthis_toolbox addthis_default_style addthis_32x32_style">
-			<a class="addthis_button_compact"></a>
-			<a class="addthis_button_facebook"></a>
-			<a class="addthis_button_twitter"></a>
-			<a class="addthis_button_google_plusone_share"></a>
-		</div>
-	<?php 
+	<div class="addthis_toolbox addthis_default_style addthis_32x32_style">
+		<a class="addthis_button_compact"></a>
+		<a class="addthis_button_facebook"></a>
+		<a class="addthis_button_twitter"></a>
+		<a class="addthis_button_google_plusone_share"></a>
+	</div>
+	<?php
 	ThemeHelpers::load_js('addthis');
 }
+
 add_action('my_theme_socials', 'my_theme_socials');
 
 /**
  * Adds some entries into the credits menu
  */
-function my_theme_credits(){
-	$toret = array();
+function my_theme_credits() {
+	$toret   = array();
 	$toret[] = HtmlHelper::anchor(
-			home_url('/'),
-			sprintf(__('&copy; %s', 'theme'), get_bloginfo('name'))
+		home_url('/'),
+		sprintf(__('&copy; %s', 'theme'), get_bloginfo('name'))
 	);
 	$toret[] = HtmlHelper::anchor(
-			__('https://github.com/setola/Wordpress-Theme-Utils/', 'theme'),
-			sprintf(__('Built on %s', 'theme'), 'WordPress Themes Utils')
+		__('https://github.com/setola/Wordpress-Theme-Utils/', 'theme'),
+		sprintf(__('Built on %s', 'theme'), 'WordPress Themes Utils')
 	);
 	$toret[] = HtmlHelper::anchor(
-			__('http://wordpress.org/', 'theme'),
-			sprintf(__('Powered by %s', 'theme' ), 'WordPress')
+		__('http://wordpress.org/', 'theme'),
+		sprintf(__('Powered by %s', 'theme'), 'WordPress')
 	);
 	$toret[] = HtmlHelper::anchor(
-			__('http://eclipse.org/', 'theme'),
-			sprintf(__('Coded with %s', 'theme' ), 'Eclipse')
+		__('http://eclipse.org/', 'theme'),
+		sprintf(__('Coded with %s', 'theme'), 'Eclipse')
 	);
 
-	echo HtmlHelper::unorderd_list($toret, array('class'=>'linear-menu clearfix'));
+	echo HtmlHelper::unorderd_list($toret, array('class' => 'linear-menu clearfix'));
 }
+
 add_action('my_theme_credits', 'my_theme_credits');
 
 /**
@@ -138,27 +175,28 @@ add_action('my_theme_credits', 'my_theme_credits');
  * @param unknown $content
  * @return unknown|string
  */
-function my_theme_caption($val, $attr, $content){
+function my_theme_caption($val, $attr, $content) {
 	$attr = shortcode_atts(
 		array(
-			'id'		=>	'',
-			'align'		=>	'',
-			'width'		=>	580, //if you don't specify the width in your shorcode, this is the default value will be considered.
-			'caption'	=>	''
+			'id'      => '',
+			'align'   => '',
+			'width'   => 580,
+			//if you don't specify the width in your shorcode, this is the default value will be considered.
+			'caption' => ''
 		),
 		$attr
 	);
 
 	$caption = HtmlHelper::standard_tag(
-			'figcaption',
-			$attr['caption'],
-			array_merge(
-					array(
-							'id'		=>	'figcaption_'.$attr['id'],
-							'class'		=>	'wp-caption-text'
-					),
-					(array)$attr['caption']
-			)
+		'figcaption',
+		$attr['caption'],
+		array_merge(
+			array(
+				'id'    => 'figcaption_' . $attr['id'],
+				'class' => 'wp-caption-text'
+			),
+			(array)$attr['caption']
+		)
 	);
 
 	$style = '';
@@ -166,24 +204,26 @@ function my_theme_caption($val, $attr, $content){
 	// fix for having the aligncenter class properly working
 	// (css 'margin: auto' property requires a known width element)
 	// 10 is 2 times the sum of padding and border for this theme
-	if($attr['align'] == 'aligncenter'){
-		$style = 'width:'.(intval($attr['width'])+10).'px';
+	if ($attr['align'] == 'aligncenter') {
+		$style = 'width:' . (intval($attr['width']) + 10) . 'px';
 	}
 
 	return HtmlHelper::standard_tag(
-			'figure',
-			do_shortcode($content).$caption,
-			array(
-					'id'			=>	$attr['id'],
-					'class'			=>	'wp-caption img-thumbnail ' . esc_attr($attr['align']),
-					'style'			=>	$style
-			)
+		'figure',
+		do_shortcode($content) . $caption,
+		array(
+			'id'    => $attr['id'],
+			'class' => 'wp-caption img-thumbnail ' . esc_attr($attr['align']),
+			'style' => $style
+		)
 	);
 
 }
+
 add_filter('img_caption_shortcode', 'my_theme_caption', 10, 3);
 
-function my_theme_gallery($content, $attr) { return 'THE GALLERY IS UNDER PROCESS!!! :D';}
+function my_theme_gallery($content, $attr) { return 'THE GALLERY IS UNDER PROCESS!!! :D'; }
+
 add_filter('post_gallery', 'my_theme_gallery', 10, 2);
 
 /**
@@ -200,20 +240,25 @@ add_filter('post_gallery', 'my_theme_gallery', 10, 2);
 function my_theme_img_tag_filter($html, $id, $caption, $title, $align, $url, $size, $alt) {
 	$thumb = wp_get_attachment_image_src($id, $size);
 	$image = HtmlHelper::image(
-			$thumb[0],
-			array(
-					'class'		=>	implode(' ', array('align'.$align, 'size-'.$size, 'wp-image-'.$id, 'img-thumbnail')),
-					'width'		=>	$thumb[1],
-					'height'	=>	$thumb[2],
-					'alt'		=>	$alt
-			)
+		$thumb[0],
+		array(
+			'class'  => implode(' ', array(
+				'align' . $align,
+				'size-' . $size,
+				'wp-image-' . $id,
+				'img-thumbnail'
+			)),
+			'width'  => $thumb[1],
+			'height' => $thumb[2],
+			'alt'    => $alt
+		)
 	);
 
-	if($url){
-		if(!$title){
+	if ($url) {
+		if (!$title) {
 			$title = get_the_title($id);
-		} 
-		$image = HtmlHelper::anchor($url, $image, array('title'=>$title)); 
+		}
+		$image = HtmlHelper::anchor($url, $image, array('title' => $title));
 	}
 	
 	return $image;
@@ -256,57 +301,63 @@ function my_theme_img_tag_filter($html, $id, $caption, $title, $align, $url, $si
 		)
 	);*/
 }
-add_filter( 'image_send_to_editor', 'my_theme_img_tag_filter', 10, 9 );
+
+add_filter('image_send_to_editor', 'my_theme_img_tag_filter', 10, 9);
 
 /**
  * Retrieves an <ul> of post metas
  * @param string $post the post
  */
-function my_theme_post_meta_list($post=null){
-	if(is_null($post)) global $post;
+function my_theme_post_meta_list($post = null) {
+	if (is_null($post)) global $post;
 	setup_postdata($post);
 	
 	$icon_class = 'glyphicon';
-	$separator = '&nbsp;&nbsp;';
-	$metas = array();
+	$separator  = '&nbsp;&nbsp;';
+	$metas      = array();
 	
 	$date = get_the_date();
-	if($date){
-		$metas[] = HtmlHelper::span('', array('class'=>$icon_class.' glyphicon-time')).$separator.$date;
+	if ($date) {
+		$metas[] = HtmlHelper::span('', array('class' => $icon_class . ' glyphicon-time')) . $separator . $date;
 	}
 	
 	$categories = get_the_category_list(', ');
-	if($categories){
-		$metas[] = HtmlHelper::span('', array('class'=>$icon_class.' glyphicon-folder-open')).$separator.$categories;
+	if ($categories) {
+		$metas[] = HtmlHelper::span('',
+		                            array('class' => $icon_class . ' glyphicon-folder-open')) . $separator . $categories;
 	}
 	
 	$tag_number = count(get_the_tags());
-	$tags = get_the_tag_list('', ', ');
-	if($tags){
+	$tags       = get_the_tag_list('', ', ');
+	if ($tags) {
 		$tag_class = ($tag_number == 1) ? 'glyphicon-tag' : 'glyphicon-tags';
-		$metas[] = HtmlHelper::span('', array('class'=>$icon_class.' '.$tag_class)).$separator.get_the_tag_list('', ', ');
+		$metas[]   = HtmlHelper::span('',
+		                              array('class' => $icon_class . ' ' . $tag_class)) . $separator . get_the_tag_list('',
+		                                                                                                                ', ');
 	}
 	
-	if(comments_open()){
-		$comments_icon = HtmlHelper::span('', array('class'=>$icon_class.' glyphicon-comment'));
-		$comments = get_comments_number();
+	if (comments_open()) {
+		$comments_icon  = HtmlHelper::span('', array('class' => $icon_class . ' glyphicon-comment'));
+		$comments       = get_comments_number();
 		$write_comments = '';
-		if($comments == 0){
+		if ($comments == 0) {
 			$write_comments .= __('No comments yet', 'theme');
-		} else {
+		}
+		else {
 			$write_comments .= sprintf(_n('1 comment', '%s comments', $comments, 'theme'), $comments);
 		}
-		$metas[] = $comments_icon.$separator.HtmlHelper::anchor(get_comments_link(), $write_comments);
-	} else {
-		$write_comments =  __('Comments off', 'theme');
+		$metas[] = $comments_icon . $separator . HtmlHelper::anchor(get_comments_link(), $write_comments);
+	}
+	else {
+		$write_comments = __('Comments off', 'theme');
 	}
 	
-	$author = HtmlHelper::anchor(get_the_author_link(), get_the_author());
-	$metas[] = HtmlHelper::span('', array('class'=>$icon_class.' glyphicon-user')).$separator.$author;
+	$author  = HtmlHelper::anchor(get_the_author_link(), get_the_author());
+	$metas[] = HtmlHelper::span('', array('class' => $icon_class . ' glyphicon-user')) . $separator . $author;
 	
 	wp_reset_postdata();
 	
-	return HtmlHelper::unorderd_list($metas, array('class'=>'list-inline entry-meta'));
+	return HtmlHelper::unorderd_list($metas, array('class' => 'list-inline entry-meta'));
 }
 
 
@@ -315,18 +366,18 @@ function my_theme_post_meta_list($post=null){
  * Also callable with [photogallery] shortcode
  * @param unknown $atts
  */
-function photogallery_gallery_shortcode($atts){
-	$data = shortcode_atts(array('ids' => ''), $atts);
-	$ids = explode(',', $data['ids']);
+function photogallery_gallery_shortcode($atts) {
+	$data        = shortcode_atts(array('ids' => ''), $atts);
+	$ids         = explode(',', $data['ids']);
 	$minigallery = new MinigalleryThumbsLinkToBig();
 
 	return $minigallery
-	->set_template('<div class="photogallery-container clearfix">%list%</div>')
-	->set_uid('photogallery')
-	->set_wp_media_dimension('photogallery_small')
-	->set_wp_media_dimension_big('big_gallery')
-	->add_images($ids)
-	->the_markup();
+		->set_template('<div class="photogallery-container clearfix">%list%</div>')
+		->set_uid('photogallery')
+		->set_wp_media_dimension('photogallery_small')
+		->set_wp_media_dimension_big('big_gallery')
+		->add_images($ids)
+		->the_markup();
 }
 
 
@@ -335,13 +386,13 @@ function photogallery_gallery_shortcode($atts){
  * Also callable with [minigallery] shortcode
  * @param unknown $atts
  */
-function minigallery_gallery_shortcode($atts){
-	$data = shortcode_atts(array('ids' => ''), $atts );
-	$ids = explode(',', $data['ids']);
+function minigallery_gallery_shortcode($atts) {
+	$data        = shortcode_atts(array('ids' => ''), $atts);
+	$ids         = explode(',', $data['ids']);
 	$minigallery = new MinigalleryThumbsLinkToBig();
 
 	return $minigallery
-	->set_template('%prev%<div
+		->set_template('%prev%<div
 			class="images-container cycle-slideshow"
 			data-cycle-fx=carousel
 			data-cycle-timeout=1000
@@ -349,11 +400,11 @@ function minigallery_gallery_shortcode($atts){
 			data-cycle-next="#minigallery .control.next"
 			data-cycle-prev="#minigallery .control.prev"
 			data-cycle-slides="> a">%list%</div>%next%')
-			->set_uid('minigallery')
-			->set_wp_media_dimension('minigallery')
-			->set_wp_media_dimension_big('big_gallery')
-			->add_images($ids)
-			->the_markup();
+		->set_uid('minigallery')
+		->set_wp_media_dimension('minigallery')
+		->set_wp_media_dimension_big('big_gallery')
+		->add_images($ids)
+		->the_markup();
 }
 
 /**
@@ -362,10 +413,10 @@ function minigallery_gallery_shortcode($atts){
  * @param unknown $atts
  * @return Ambigous <the, mixed>
  */
-function slideshow_gallery_shortcode($atts){
-	$gallery 	= new BootstrapCarousel();
-	$data 		= shortcode_atts(array('ids' => ''), $atts );
-	$ids 		= explode(',', $data['ids']);
+function slideshow_gallery_shortcode($atts) {
+	$gallery = new BootstrapCarousel();
+	$data    = shortcode_atts(array('ids' => ''), $atts);
+	$ids     = explode(',', $data['ids']);
 
 	return $gallery
 		->set_uid('slideshow')
@@ -375,46 +426,46 @@ function slideshow_gallery_shortcode($atts){
 }
 
 
-
 /**
  * Manages the [preview] shortcode
  * parameters:
- * 	'id' 			=>	'',
- * 	'title'			=>	'',
- * 	'image'			=>	'',
- * 	'image-class'	=>	'img-circle',
- * 	'cta_text'		=>	__('Read More', 'theme'),
- * 	'cta_url'		=>	'',
- * 	'cta_class'		=>	'btn-primary',
- * 	'cta_target'	=>	'',
- * 	'class'			=>	'col-lg-4 col-xs-12 col-md-4 aligncenter preview'
- * 
+ *    'id'            =>    '',
+ *    'title'            =>    '',
+ *    'image'            =>    '',
+ *    'image-class'    =>    'img-circle',
+ *    'cta_text'        =>    __('Read More', 'theme'),
+ *    'cta_url'        =>    '',
+ *    'cta_class'        =>    'btn-primary',
+ *    'cta_target'    =>    '',
+ *    'class'            =>    'col-lg-4 col-xs-12 col-md-4 aligncenter preview'
+ *
  * @param unknown $atts
  * @param string $content
  * @return mixed
  */
-function preview_shortcode($atts, $content=null){
-	$data 		= shortcode_atts(
+function preview_shortcode($atts, $content = null) {
+	$data = shortcode_atts(
 		array(
-			'id' 			=>	'',
-			'title'			=>	'',
-			'image'			=>	'',
-			'image-class'	=>	'img-circle',
-			'cta_text'		=>	__('Read More', 'theme'),
-			'cta_url'		=>	'',
-			'cta_class'		=>	'btn-primary',
-			'cta_target'	=>	'',
-			'class'			=>	'col-lg-4 col-xs-12 col-md-4 aligncenter preview'
-		), 
-		$atts 
+			'id'          => '',
+			'title'       => '',
+			'image'       => '',
+			'image-class' => 'img-circle',
+			'cta_text'    => __('Read More', 'theme'),
+			'cta_url'     => '',
+			'cta_class'   => 'btn-primary',
+			'cta_target'  => '',
+			'class'       => 'col-lg-4 col-xs-12 col-md-4 aligncenter preview'
+		),
+		$atts
 	);
 	
-	if(!empty($data['id'])){
+	if (!empty($data['id'])) {
 		global $post;
 		$post = get_post($data['id']);
 		setup_postdata($post);
 		$data['cta_url'] = intval($data['id']);
-		if(has_post_thumbnail($data['id'])) $data['image'] = get_post_thumbnail_id($data['id']);
+		if (has_post_thumbnail($data['id']))
+			$data['image'] = get_post_thumbnail_id($data['id']);
 		$data['title'] = get_the_title();
 	}
 	
@@ -431,25 +482,28 @@ EOF;
 	
 	// build the href for the call to action
 	$href = '';
-	if(is_numeric($data['cta_url'])) {
+	if (is_numeric($data['cta_url'])) {
 		$href = get_permalink($data['cta_url']);
-	} elseif(is_string($data['cta_url'])){
+	}
+	elseif (is_string($data['cta_url'])) {
 		$href = $data['cta_url'];
 	}
 	
 	// build the image
 	$image = '';
-	if(is_numeric($data['image'])){
+	if (is_numeric($data['image'])) {
 		$img_src = wp_get_attachment_image_src($data['image']);
 		$img_src = $img_src[0];
-	} elseif(is_string($data['image'])){
+	}
+	elseif (is_string($data['image'])) {
 		$img_src = $data['image'];
-	} elseif(has_post_thumbnail($data['id'])) {
+	}
+	elseif (has_post_thumbnail($data['id'])) {
 		$img_src = wp_get_attachment_image_src(get_post_thumbnail_id($data['id']));
 	}
 	
-	$image = HtmlHelper::image($img_src, array('class'=>$data['image-class']));
-	$image = HtmlHelper::anchor($href, $image, array('class'=>'img-anchor'));
+	$image = HtmlHelper::image($img_src, array('class' => $data['image-class']));
+	$image = HtmlHelper::anchor($href, $image, array('class' => 'img-anchor'));
 	
 	
 	$subs = new SubstitutionTemplate();
@@ -460,67 +514,69 @@ EOF;
 		->set_markup('image', $image)
 		->set_markup('title', HtmlHelper::standard_tag('h2', $data['title']))
 		->set_markup('description', HtmlHelper::paragraph($content))
-		->set_markup('cta', empty($href) 
-			? '' 
+		->set_markup('cta', empty($href)
+			? ''
 			: HtmlHelper::anchor(
-					$href, 
-					$data['cta_text'], 
-					array(
-						'class'=>'btn '.$data['cta_class'], 
-						'target'=>$data['cta_target'])
+				$href,
+				$data['cta_text'],
+				array(
+					'class'  => 'btn ' . $data['cta_class'],
+					'target' => $data['cta_target']
+				)
 			)
 		)
 		->replace_markup();
 }
+
 add_shortcode('preview', 'preview_shortcode');
 
 /**
  * Manages the [feature] shortcode
  * Parameters:
- * 	'id' 			=>	'',
- * 	'title'			=>	'',
- * 	'subtitle'		=>	'',
- * 	'description'	=>	'',
- * 	'image'			=>	'',
- * 	'image-class'	=>	'img-thumbnail img-responsive aligncenter',
- * 	'img_position'	=>	'left',
- * 	'cta_text'		=>	__('Read More', 'theme'),
- * 	'cta_url'		=>	'',
- * 	'class'			=>	'row featurette',
- * 	'text_wrapper_class'	=>	'col-md-7',
- * 	'image_wrapper_class'	=>	'col-md-5'
- * 
+ *    'id'            =>    '',
+ *    'title'            =>    '',
+ *    'subtitle'        =>    '',
+ *    'description'    =>    '',
+ *    'image'            =>    '',
+ *    'image-class'    =>    'img-thumbnail img-responsive aligncenter',
+ *    'img_position'    =>    'left',
+ *    'cta_text'        =>    __('Read More', 'theme'),
+ *    'cta_url'        =>    '',
+ *    'class'            =>    'row featurette',
+ *    'text_wrapper_class'    =>    'col-md-7',
+ *    'image_wrapper_class'    =>    'col-md-5'
+ *
  * @param unknown $atts
  * @param string $content
  * @return mixed
-*/
-function feature_shortcode($atts, $content=null){
-	$data 		= shortcode_atts(
+ */
+function feature_shortcode($atts, $content = null) {
+	$data = shortcode_atts(
 		array(
-			'id' 			=>	'',
-			'title'			=>	'',
-			'subtitle'		=>	'',
-			'description'	=>	'',
-			'image'			=>	'',
-			'image-class'	=>	'img-thumbnail img-responsive aligncenter',
-			'img_position'	=>	'left',
-			'cta_text'		=>	__('Read More', 'theme'),
-			'cta_url'		=>	'',
-			'class'			=>	'row featurette',
-			'text_wrapper_class'	=>	'col-md-7',
-			'image_wrapper_class'	=>	'col-md-5'
-		), 
-		$atts 
+			'id'                  => '',
+			'title'               => '',
+			'subtitle'            => '',
+			'description'         => '',
+			'image'               => '',
+			'image-class'         => 'img-thumbnail img-responsive aligncenter',
+			'img_position'        => 'left',
+			'cta_text'            => __('Read More', 'theme'),
+			'cta_url'             => '',
+			'class'               => 'row featurette',
+			'text_wrapper_class'  => 'col-md-7',
+			'image_wrapper_class' => 'col-md-5'
+		),
+		$atts
 	);
 	
-	if(!empty($data['id'])){
+	if (!empty($data['id'])) {
 		global $post;
 		$post = get_post($data['id']);
 		setup_postdata($post);
 	}
 	
-	$tpl = $data['img_position'] == 'left' 
-		?	<<< EOF
+	$tpl = $data['img_position'] == 'left'
+		? <<< EOF
 	
 	<div class="%class%">
 		%image%
@@ -528,7 +584,7 @@ function feature_shortcode($atts, $content=null){
 	</div>
 	
 EOF
-		:	<<< EOF
+		: <<< EOF
 	
 	<div class="%class%">
 		%text%
@@ -540,42 +596,47 @@ EOF;
 	
 	// build the image
 	$image = '';
-	if(is_numeric($data['image'])){
+	if (is_numeric($data['image'])) {
 		$img_src = wp_get_attachment_image_src($data['image'], 'feature');
 		$img_src = $img_src[0];
-	} elseif(is_string($data['image'])){
+	}
+	elseif (is_string($data['image'])) {
 		$img_src = $data['image'];
-	} elseif(has_post_thumbnail($data['id'])) {
+	}
+	elseif (has_post_thumbnail($data['id'])) {
 		$img_src = wp_get_attachment_image_src(get_post_thumbnail_id($data['id']), 'feature');
 	}
 	
-	$image = HtmlHelper::image($img_src, array('class'=>$data['image-class']));
+	$image = HtmlHelper::image($img_src, array('class' => $data['image-class']));
 	
 	// build the href for the call to action
 	$href = '';
-	if(is_numeric($data['cta_url'])) {
+	if (is_numeric($data['cta_url'])) {
 		$href = get_permalink($data['cta_url']);
-	} elseif(is_string($data['cta_url'])){
+	}
+	elseif (is_string($data['cta_url'])) {
 		$href = $data['cta_url'];
 	}
 	
 	// build up some text
-	$subtitle = HtmlHelper::span($data['subtitle'], array('class'=>'text-muted'));
-	$title = HtmlHelper::standard_tag('h2', $data['title'].' '.$subtitle);
-	$description = HtmlHelper::paragraph($content, array('class'=>'lead'));
-	$cta = empty($href) ? '' : HtmlHelper::anchor($href, $data['cta_text'], array('class'=>'btn btn-default'));
+	$subtitle    = HtmlHelper::span($data['subtitle'], array('class' => 'text-muted'));
+	$title       = HtmlHelper::standard_tag('h2', $data['title'] . ' ' . $subtitle);
+	$description = HtmlHelper::paragraph($content, array('class' => 'lead'));
+	$cta         = empty($href) ? ''
+		: HtmlHelper::anchor($href, $data['cta_text'], array('class' => 'btn btn-default'));
 	
-	$text = HtmlHelper::div($title.$description.$cta, array('class'=>$data['text_wrapper_class']));
+	$text = HtmlHelper::div($title . $description . $cta, array('class' => $data['text_wrapper_class']));
 	
 	$subs = new SubstitutionTemplate();
 	
 	return $subs
 		->set_tpl($tpl)
 		->set_markup('class', $data['class'])
-		->set_markup('image', HtmlHelper::div($image, array('class'=>$data['image_wrapper_class'])))
+		->set_markup('image', HtmlHelper::div($image, array('class' => $data['image_wrapper_class'])))
 		->set_markup('text', $text)
 		->replace_markup();
 }
+
 add_shortcode('feature', 'feature_shortcode');
 
 /**
@@ -584,20 +645,23 @@ add_shortcode('feature', 'feature_shortcode');
  * @param string $content the inner content
  * @return string html markup
  */
-function divider_shortcode($atts, $content=null){
-	$data 		= shortcode_atts(
+function divider_shortcode($atts, $content = null) {
+	$data = shortcode_atts(
 		array(
-			'class'		=>	'featurette-divider'
+			'class' => 'featurette-divider'
 		),
 		$atts
 	);
-	return HtmlHelper::standard_tag('hr', '', array('class'=>$data['class']));
+
+	return HtmlHelper::standard_tag('hr', '', array('class' => $data['class']));
 }
+
 add_shortcode('divider', 'divider_shortcode');
 
-function row_shortcode($atts, $content=null){
-	return HtmlHelper::div(do_shortcode($content), array('class'=>'row'));
+function row_shortcode($atts, $content = null) {
+	return HtmlHelper::div(do_shortcode($content), array('class' => 'row'));
 }
+
 add_shortcode('row', 'row_shortcode');
 
 
@@ -607,53 +671,8 @@ add_shortcode('row', 'row_shortcode');
 //add_filter( 'the_content', 'shortcode_unautop',100 );
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // TODO
-function login_menu(){
+function login_menu() {
 	$tpl = <<<EOF
 		<form class="inline-form login-form margin-form" action="%action%" method="post">
 			<fieldset>
@@ -669,9 +688,10 @@ function login_menu(){
 EOF;
 
 	$sub = new SubstitutionTemplate();
+
 	return $sub
 		->set_tpl($tpl)
-		->set_markup('action', get_option('home').'/wp-login.php')
+		->set_markup('action', get_option('home') . '/wp-login.php')
 		->set_markup('user', __('Username', 'theme'))
 		->set_markup('password', __('Password', 'theme'))
 		->set_markup('remember', __('Remember Me', 'theme'))
@@ -679,17 +699,17 @@ EOF;
 		->replace_markup();
 }
 
-function logout_menu(){
-	$logout_href 		= wp_logout_url(urlencode($_SERVER['REQUEST_URI']));
-	$logout 				= __('Logout', self::textdomain);
-	$admin_href 		= '/wp-admin/';
-	$admin 					= __('Dashboard', self::textdomain);
-	$vehicles_href 	= '/wp-admin/admin.php?page='.VehiclesStatsConfig::get_instance()->menu->vehicles->slug;
-	$vehicles 			= __('Vehicles', self::textdomain);
-	$events_href 		= '/wp-admin/admin.php?page='.VehiclesStatsConfig::get_instance()->menu->manage->slug;
-	$events 				= __('Events', self::textdomain);
-	$stats_href 		= '/wp-admin/admin.php?page='.VehiclesStatsConfig::get_instance()->menu->stats->slug;
-	$stats 					= __('Stats', self::textdomain);
+function logout_menu() {
+	$logout_href   = wp_logout_url(urlencode($_SERVER['REQUEST_URI']));
+	$logout        = __('Logout', self::textdomain);
+	$admin_href    = '/wp-admin/';
+	$admin         = __('Dashboard', self::textdomain);
+	$vehicles_href = '/wp-admin/admin.php?page=' . VehiclesStatsConfig::get_instance()->menu->vehicles->slug;
+	$vehicles      = __('Vehicles', self::textdomain);
+	$events_href   = '/wp-admin/admin.php?page=' . VehiclesStatsConfig::get_instance()->menu->manage->slug;
+	$events        = __('Events', self::textdomain);
+	$stats_href    = '/wp-admin/admin.php?page=' . VehiclesStatsConfig::get_instance()->menu->stats->slug;
+	$stats         = __('Stats', self::textdomain);
 
 	return <<<EOF
 			<li><a href="$admin_href" rel="noinde,nofollow">$admin</a></li>
@@ -701,29 +721,28 @@ function logout_menu(){
 EOF;
 }
 
-function account_menu_ajax(){
+function account_menu_ajax() {
 	die((is_user_logged_in()) ? logout_menu() : login_menu());
 }
 
 
-
-
-if(!function_exists('my_theme_accordion_shortcode')){
-	function my_theme_accordion_shortcode($atts, $content){
+if (!function_exists('my_theme_accordion_shortcode')) {
+	function my_theme_accordion_shortcode($atts, $content) {
 		$data = shortcode_atts(array(), $atts);
+
 		return str_replace("\r\n", '', '<div class="panel-group">' . do_shortcode($content) . '</div>');
 	}
 
 	add_shortcode('accordion', 'my_theme_accordion_shortcode');
 }
 
-if(!function_exists('my_theme_accordion_element_shortcode')){
-	function my_theme_accordion_element_shortcode($atts, $content){
+if (!function_exists('my_theme_accordion_element_shortcode')) {
+	function my_theme_accordion_element_shortcode($atts, $content) {
 		$data = shortcode_atts(
 			array(
-				'id'    =>  uniqid('accordion-element-'),
-				'in'    =>  '',
-				'question' =>  ''
+				'id'       => uniqid('accordion-element-'),
+				'in'       => '',
+				'question' => ''
 			),
 			$atts
 		);
@@ -751,7 +770,7 @@ EOF
 		      ->set_markup('post', '</div>')
 		      ->set_markup('in', '');
 
-		$toret =  $panel
+		$toret = $panel
 			->minify_template()
 			->set_markup('id', $data['id'])
 			->set_markup('in', empty($data['in']) ? '' : 'in')
@@ -759,7 +778,11 @@ EOF
 			->set_markup('body', do_shortcode($content))
 			->replace_markup();
 
-		return str_replace(array("\n","\r", "\r\n"), '', $toret);
+		return str_replace(array(
+			                   "\n",
+			                   "\r",
+			                   "\r\n"
+		                   ), '', $toret);
 	}
 
 
