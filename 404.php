@@ -8,6 +8,8 @@
  */
 
 use WPTU\Core\Helpers\ThemeHelpers;
+use WPTU\Core\Helpers\ImageGenerators\ImageGenerator;
+use WPTU\Core\Helpers\EscapeRoute;
 
 ThemeHelpers::load_css('style');
 ThemeHelpers::load_js('bootstrap');
